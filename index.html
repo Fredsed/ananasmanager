@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#2d6a1f"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="AnanasManager"/>
+<title>AnanasManager 🍍</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --green:#2d6a1f;--green2:#4a9435;--green-light:#eaf5e6;--green-dark:#1a3f12;
+  --amber:#b07d0e;--amber-light:#fdf3d7;
+  --coral:#c0392b;--coral-light:#fdecea;
+  --teal:#0e7c6b;--teal-light:#e0f5f1;
+  --blue:#1a5fa8;--blue-light:#e3edf8;
+  --bg:#f7faf5;--card:#ffffff;--border:#d4e3cf;
+  --text:#1a2e16;--text2:#4a6644;--text3:#7a9874;
+  --shadow:0 2px 12px rgba(45,106,31,0.10);
+  --radius:14px;--radius-sm:8px;
+  --font:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--text);}
+
+/* TOP BAR */
+.topbar{background:var(--green);color:#fff;padding:14px 16px 10px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.topbar-icon{font-size:26px;line-height:1;}
+.topbar-title{font-size:18px;font-weight:600;letter-spacing:-0.3px;}
+.topbar-sub{font-size:11px;opacity:0.75;margin-top:1px;}
+
+/* MAIN SCROLL */
+.main-scroll{height:calc(100vh - 116px);overflow-y:auto;overflow-x:hidden;padding:14px 14px 20px;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,0.08);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 12px;border:none;background:transparent;cursor:pointer;color:var(--text3);gap:4px;font-family:var(--font);transition:color 0.15s;}
+.nav-btn.active{color:var(--green);}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.nav-btn span{font-size:10px;font-weight:500;}
+
+/* SECTIONS */
+.section{display:none;}
+.section.active{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title svg{width:18px;height:18px;stroke:var(--green);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.metrics-4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.metric{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 12px;box-shadow:var(--shadow);}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;}
+.metric-value{font-size:20px;font-weight:600;color:var(--text);font-family:var(--font-mono);line-height:1.1;}
+.metric-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+.mv-green{color:var(--green);}
+.mv-amber{color:var(--amber);}
+.mv-coral{color:var(--coral);}
+.mv-blue{color:var(--blue);}
+
+/* BADGES */
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;}
+.badge-green{background:var(--green-light);color:var(--green-dark);}
+.badge-amber{background:var(--amber-light);color:#7a5a00;}
+.badge-coral{background:var(--coral-light);color:#8b1a12;}
+.badge-blue{background:var(--blue-light);color:#0d3a6e;}
+
+/* PROGRESS */
+.prog-wrap{background:#e8f0e5;border-radius:20px;height:8px;overflow:hidden;margin:6px 0;}
+.prog-bar{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--green2),var(--green));transition:width 0.5s ease;}
+
+/* FORMS */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.form-group label{font-size:12px;font-weight:600;color:var(--text2);}
+.form-group input,.form-group select,.form-group textarea{border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;font-size:14px;background:#fff;color:var(--text);font-family:var(--font);width:100%;outline:none;}
+.form-group input:focus,.form-group select:focus{border-color:var(--green2);box-shadow:0 0 0 3px rgba(74,148,53,0.12);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* BUTTONS */
+.btn{padding:12px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:all 0.15s;display:block;text-align:center;}
+.btn-primary{background:var(--green);color:#fff;width:100%;margin-top:4px;}
+.btn-primary:active{background:var(--green-dark);transform:scale(0.98);}
+.btn-secondary{background:var(--green-light);color:var(--green);border:1px solid var(--border);width:100%;margin-top:6px;}
+.btn-danger{background:var(--coral-light);color:var(--coral);border:1px solid #f0b8b3;width:100%;margin-top:6px;}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:6px;cursor:pointer;border:none;font-family:var(--font);font-weight:600;}
+.btn-sm-green{background:var(--green-light);color:var(--green);}
+.btn-sm-coral{background:var(--coral-light);color:var(--coral);}
+.btn-sm-blue{background:var(--blue-light);color:var(--blue);}
+
+/* TERRAIN CARDS */
+.terrain-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);cursor:pointer;transition:border-color 0.15s;}
+.terrain-card:active{border-color:var(--green2);}
+.terrain-card.selected{border-color:var(--green);box-shadow:0 0 0 3px rgba(45,106,31,0.1);}
+.tc-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.tc-icon{width:40px;height:40px;background:var(--green-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.tc-title{font-size:15px;font-weight:600;color:var(--text);}
+.tc-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.tc-actions{display:flex;gap:8px;margin-top:12px;}
+.tc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
+.tc-stat{text-align:center;}
+.tc-stat-val{font-size:14px;font-weight:600;font-family:var(--font-mono);color:var(--text);}
+.tc-stat-lbl{font-size:10px;color:var(--text3);}
+
+/* EXPENSE */
+.expense-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--border);}
+.exp-icon{width:36px;height:36px;background:var(--green-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.exp-info{flex:1;min-width:0;}
+.exp-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exp-cat{font-size:11px;color:var(--text3);}
+.exp-amount{font-size:13px;font-weight:600;color:var(--coral);flex-shrink:0;font-family:var(--font-mono);}
+.exp-del{width:28px;height:28px;background:var(--coral-light);border:none;border-radius:6px;cursor:pointer;flex-shrink:0;font-size:13px;}
+
+/* PHASE */
+.phase-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.phase-row:last-child{border-bottom:none;}
+.phase-label{font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;}
+
+/* SLIDERS */
+.slider-row{margin-bottom:14px;}
+.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.slider-label{font-size:12px;font-weight:600;color:var(--text2);}
+.slider-val{font-size:13px;font-weight:600;color:var(--green);font-family:var(--font-mono);}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:5px;background:#d4e3cf;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--green);cursor:pointer;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,0.2);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:14px 0;}
+
+/* FORECAST TABLE */
+.ftable{width:100%;border-collapse:collapse;font-size:12px;}
+.ftable th{font-size:11px;font-weight:600;color:var(--text3);padding:8px 4px;border-bottom:1px solid var(--border);text-align:left;}
+.ftable td{padding:9px 4px;border-bottom:1px solid #f0f5ee;color:var(--text);}
+.ftable tr:last-child td{border-bottom:none;}
+.profit{color:var(--green);font-weight:600;}
+.loss{color:var(--coral);font-weight:600;}
+
+/* TOTAL ROW */
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid var(--border);margin-top:6px;}
+.total-label{font-size:13px;font-weight:600;color:var(--text2);}
+.total-val{font-size:18px;font-weight:700;color:var(--coral);font-family:var(--font-mono);}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;opacity:0;transition:all 0.3s;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* MODAL */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:200;display:none;align-items:flex-end;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px 30px;}
+.modal-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text);}
+
+/* EMPTY */
+.empty{text-align:center;padding:30px 20px;color:var(--text3);}
+.empty-icon{font-size:40px;margin-bottom:10px;}
+.empty p{font-size:13px;line-height:1.6;}
+
+/* RESULT BOX */
+.result-box{background:var(--green-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-top:12px;}
+.result-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;}
+.result-big{font-size:22px;font-weight:700;color:var(--green);font-family:var(--font-mono);}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%;}
+
+/* SUMMARY TERRAIN ROW */
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.sum-row:last-child{border-bottom:none;}
+.sum-name{font-weight:500;color:var(--text);display:flex;align-items:center;gap:6px;}
+.sum-vals{text-align:right;}
+.sum-dep{font-size:12px;color:var(--coral);font-family:var(--font-mono);font-weight:600;}
+.sum-plants{font-size:11px;color:var(--text3);}
+
+/* COLOR DOTS */
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-icon">🍍</div>
+  <div>
+    <div class="topbar-title">AnanasManager</div>
+    <div class="topbar-sub" id="topbar-sub">Tous les terrains</div>
+  </div>
+</div>
+
+<!-- SYNC STATUS BAR -->
+<div style="background:var(--green-dark);padding:4px 16px;min-height:22px;">
+  <span id="sync-status" style="font-size:11px;color:rgba(255,255,255,0.6);">En attente d'action…</span>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-scroll" id="main-scroll" style="height:calc(100vh - 138px);">
+
+  <!-- ===== TABLEAU DE BORD ===== -->
+  <div class="section active" id="sec-dashboard">
+    <div class="metrics-4">
+      <div class="metric">
+        <div class="metric-label">Terrains</div>
+        <div class="metric-value mv-blue" id="d-terrains">0</div>
+        <div class="metric-sub">parcelles</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Superficie tot.</div>
+        <div class="metric-value mv-green" id="d-superficie">0 ha</div>
+        <div class="metric-sub">total</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Total dépenses</div>
+        <div class="metric-value mv-coral" id="d-depenses">0</div>
+        <div class="metric-sub">FCFA engagés</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Plants total</div>
+        <div class="metric-value mv-amber" id="d-plants">0</div>
+        <div class="metric-sub">pieds d'ananas</div>
+      </div>
+    </div>
+
+    <!-- Récapitulatif par terrain -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Récapitulatif par terrain
+      </div>
+      <div id="dash-terrains-list">
+        <div class="empty"><div class="empty-icon">🗺️</div><p>Aucun terrain enregistré.<br/>Allez dans "Terrains" pour en ajouter.</p></div>
+      </div>
+    </div>
+
+    <!-- Chart répartition dépenses -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Dépenses par terrain
+      </div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="dashDonut" role="img" aria-label="Dépenses par terrain"></canvas>
+      </div>
+    </div>
+
+    <!-- Prévision globale -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+        Prévision globale
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prix vente (FCFA / tonne)</label>
+          <input type="number" id="g-prix-tonne" value="100000" inputmode="numeric" oninput="updateGlobalPrev()"/>
+        </div>
+        <div class="form-group">
+          <label>Rendement (tonne / ha)</label>
+          <input type="number" id="g-tonne-ha" value="20" step="0.5" inputmode="decimal" oninput="updateGlobalPrev()"/>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">
+        Superficie totale et dépenses totales issues de vos terrains enregistrés.
+      </div>
+      <div class="metrics" style="margin-top:0;">
+        <div class="metric">
+          <div class="metric-label">Production totale</div>
+          <div class="metric-value mv-amber" id="g-prod">—</div>
+          <div class="metric-sub">tonnes</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Chiffre d'affaires</div>
+          <div class="metric-value mv-green" id="g-ca">—</div>
+          <div class="metric-sub">FCFA</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Charges totales</div>
+          <div class="metric-value mv-coral" id="g-charges">—</div>
+          <div class="metric-sub">FCFA</div>
+        </div>
+        <div class="metric" style="border:1px solid var(--green);border-radius:var(--radius-sm);">
+          <div class="metric-label">Bénéfice net</div>
+          <div class="metric-value" id="g-benef">—</div>
+          <div class="metric-sub" id="g-benef-sub">FCFA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TERRAINS ===== -->
+  <div class="section" id="sec-terrains">
+    <button class="btn btn-primary" onclick="openModalTerrain()" style="margin-bottom:14px;">➕ Ajouter un nouveau terrain</button>
+    <div id="terrains-list">
+      <div class="empty"><div class="empty-icon">🌿</div><p>Aucun terrain enregistré.<br/>Appuyez sur le bouton ci-dessus pour commencer.</p></div>
+    </div>
+  </div>
+
+  <!-- ===== DÉPENSES (d'un terrain) ===== -->
+  <div class="section" id="sec-depenses">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <button class="btn-sm btn-sm-green" onclick="showSection('terrains')">← Retour</button>
+      <div>
+        <div style="font-size:15px;font-weight:600;" id="dep-terrain-title">—</div>
+        <div style="font-size:11px;color:var(--text3);" id="dep-terrain-sub">—</div>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Total dépenses</div>
+        <div class="metric-value mv-coral" id="dep-total-metric">0</div>
+        <div class="metric-sub">FCFA</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Nb. dépenses</div>
+        <div class="metric-value" id="dep-count-metric">0</div>
+        <div class="metric-sub">enregistrées</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle dépense
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select id="dep-cat">
+          <option value="🏡">🏡 Terrain & aménagement</option>
+          <option value="🌱">🌱 Plants / Rejets</option>
+          <option value="🧪">🧪 Intrants agricoles</option>
+          <option value="👷">👷 Main d'œuvre</option>
+          <option value="🚜">🚜 Équipements</option>
+          <option value="💧">💧 Irrigation</option>
+          <option value="🚚">🚚 Transport</option>
+          <option value="📦">📦 Autres</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Désignation</label>
+        <input type="text" id="dep-nom" placeholder="ex: Engrais NPK 50kg"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Montant (FCFA)</label>
+          <input type="number" id="dep-montant" placeholder="50000" inputmode="numeric"/>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="dep-date"/>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="ajouterDepense()">✅ Enregistrer</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+        Historique
+      </div>
+      <div id="liste-depenses">
+        <div class="empty"><div class="empty-icon">📋</div><p>Aucune dépense pour ce terrain.</p></div>
+      </div>
+      <div class="total-row">
+        <span class="total-label">TOTAL</span>
+        <span class="total-val" id="dep-total-affiche">0 FCFA</span>
+      </div>
+      <button class="btn btn-secondary" onclick="exporterDepenses()">📤 Exporter CSV</button>
+    </div>
+  </div>
+
+  <!-- ===== PRÉVISIONS ===== -->
+  <div class="section" id="sec-previsions">
+
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Paramètres de simulation
+      </div>
+
+      <!-- Tonne/ha -->
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Rendement (t/ha)</span>
+          <span class="slider-val" id="sv-tonne">20 t/ha</span>
+        </div>
+        <input type="range" min="5" max="80" step="1" value="20" id="sl-tonne" oninput="calcSim()"/>
+      </div>
+
+      <!-- Nombre ha -->
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Superficie (ha)</span>
+          <span class="slider-val" id="sv-ha">2.5 ha</span>
+        </div>
+        <input type="range" min="0.5" max="50" step="0.5" value="2.5" id="sl-ha" oninput="calcSim()"/>
+      </div>
+
+      <!-- Prix vente / tonne -->
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Prix vente (FCFA/t)</span>
+          <span class="slider-val" id="sv-prix">100 000</span>
+        </div>
+        <input type="range" min="10000" max="500000" step="5000" value="100000" id="sl-prix" oninput="calcSim()"/>
+      </div>
+
+      <!-- Dépense / ha -->
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Dépense (FCFA/ha)</span>
+          <span class="slider-val" id="sv-dep">300 000</span>
+        </div>
+        <input type="range" min="50000" max="2000000" step="10000" value="300000" id="sl-dep" oninput="calcSim()"/>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-top:6px;">
+        <button class="btn-sm btn-sm-green" onclick="resetSim()">🔄 Réinitialiser</button>
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="card" id="sim-results">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Résultats de la simulation
+      </div>
+
+      <!-- Intermédiaires -->
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;border:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:8px;">Calculs intermédiaires</div>
+        <div class="result-row"><span style="color:var(--text2);">Production totale</span><span style="font-weight:600;" id="sim-prod">—</span></div>
+        <div class="result-row"><span style="color:var(--text2);">Chiffre d'affaires</span><span style="font-weight:600;color:var(--green);" id="sim-ca">—</span></div>
+        <div class="result-row"><span style="color:var(--text2);">Charges totales</span><span style="font-weight:600;color:var(--coral);" id="sim-charges">—</span></div>
+      </div>
+
+      <!-- KPI principaux -->
+      <div class="metrics-4">
+        <div class="metric" style="border-left:3px solid var(--green);">
+          <div class="metric-label">Bénéfice net</div>
+          <div class="metric-value" id="sim-benef" style="font-size:17px;">—</div>
+          <div class="metric-sub">FCFA total</div>
+        </div>
+        <div class="metric" style="border-left:3px solid var(--amber);">
+          <div class="metric-label">Bénéfice/ha</div>
+          <div class="metric-value mv-amber" id="sim-benef-ha" style="font-size:17px;">—</div>
+          <div class="metric-sub">FCFA / ha</div>
+        </div>
+        <div class="metric" style="border-left:3px solid var(--teal);">
+          <div class="metric-label">Rendement val.</div>
+          <div class="metric-value mv-green" id="sim-rendval" style="font-size:17px;">—</div>
+          <div class="metric-sub">FCFA / tonne</div>
+        </div>
+        <div class="metric" style="border-left:3px solid var(--coral);">
+          <div class="metric-label">ROI</div>
+          <div class="metric-value" id="sim-roi" style="font-size:17px;">—</div>
+          <div class="metric-sub">retour invest.</div>
+        </div>
+      </div>
+
+      <!-- Jauge visuelle -->
+      <div style="margin-top:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:5px;">
+          <span>Rentabilité</span><span id="sim-rentlabel">—</span>
+        </div>
+        <div class="prog-wrap" style="height:12px;">
+          <div class="prog-bar" id="sim-prog" style="width:0%;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- end main-scroll -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-dashboard" onclick="showSection('dashboard')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>Tableau</span>
+  </button>
+  <button class="nav-btn" id="nav-terrains" onclick="showSection('terrains')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Terrains</span>
+  </button>
+  <button class="nav-btn" id="nav-previsions" onclick="showSection('previsions')">
+    <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    <span>Prévisions</span>
+  </button>
+</nav>
+
+<!-- MODAL AJOUTER / ÉDITER TERRAIN -->
+<div class="modal-overlay" id="modal-terrain">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-terrain-title">Nouveau terrain</div>
+    <div class="form-group">
+      <label>Nom du terrain</label>
+      <input type="text" id="t-nom" placeholder="ex: Parcelle Nord, Terrain Kpomassè…"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Superficie (ha)</label>
+        <input type="number" id="t-superficie" placeholder="2.5" step="0.1" inputmode="decimal"/>
+      </div>
+      <div class="form-group">
+        <label>Pieds d'ananas</label>
+        <input type="number" id="t-plants" placeholder="8500" inputmode="numeric"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Localisation</label>
+      <input type="text" id="t-lieu" placeholder="ex: Allada, Abomey-Calavi…"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Mois actuel (1–22)</label>
+        <input type="number" id="t-mois" placeholder="8" min="1" max="22"/>
+      </div>
+      <div class="form-group">
+        <label>Variété</label>
+        <select id="t-variete">
+          <option>Cayenne Lisse</option>
+          <option>Sugarloaf</option>
+          <option>Pain de Sucre</option>
+          <option>Autre</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Date de plantation</label>
+      <input type="date" id="t-date"/>
+    </div>
+    <input type="hidden" id="t-edit-id"/>
+    <button class="btn btn-primary" onclick="sauvegarderTerrain()">✅ Enregistrer le terrain</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-terrain')">Annuler</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ STORAGE ============
+function save(key,val){try{localStorage.setItem('am_'+key,JSON.stringify(val));}catch(e){}}
+function load(key,def){try{const v=localStorage.getItem('am_'+key);return v!==null?JSON.parse(v):def;}catch(e){return def;}}
+
+// ============ STATE ============
+let terrains = load('terrains',[]);
+let depensesMap = load('depensesMap',{}); // { terrainId: [...] }
+let currentTerrainId = null;
+let dashDonutInst = null;
+
+const COLORS = ['#2d6a1f','#1D9E75','#b07d0e','#c0392b','#1a5fa8','#8e44ad','#e67e22','#16a085'];
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzcCX_ASYhEf4XLIYIvv3-Vd1KSKPEzSG1kGowN5KLZfqRnywkiqfv_UdXNnRo3C4wN/exec';
+let syncTimer = null;
+
+function syncToSheets(){
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(_doSync, 800);
+}
+
+async function _doSync(){
+  setSyncStatus('syncing','🔄 Sync Google Sheets…');
+  try {
+    const payload = JSON.stringify({action:'sync_all', terrains, depensesMap});
+    // no-cors : contourne les restrictions CORS des fichiers locaux
+    // On ne peut pas lire la réponse en no-cors, donc on considère OK si pas d'exception
+    await fetch(GS_URL, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body: payload
+    });
+    setSyncStatus('ok','✅ Google Sheets à jour · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
+    save('pendingSync',false);
+  } catch(e){
+    setSyncStatus('error','⚠️ Pas de connexion — sync en attente');
+    save('pendingSync',true);
+  }
+}
+
+function setSyncStatus(state,msg){
+  const el=document.getElementById('sync-status');
+  if(!el) return;
+  el.textContent=msg;
+  el.style.color=state==='ok'?'var(--green)':state==='error'?'var(--amber)':'var(--text3)';
+}
+
+window.addEventListener('online',()=>{ if(load('pendingSync',false)) syncToSheets(); });
+
+// ============ HELPERS ============
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function fmt(n){return Number(n).toLocaleString('fr-FR');}
+function getTerrain(id){return terrains.find(t=>t.id===id);}
+function getDepenses(id){return depensesMap[id]||[];}
+function totalDep(id){return getDepenses(id).reduce((s,d)=>s+d.montant,0);}
+
+// ============ NAVIGATION ============
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const sec=document.getElementById('sec-'+id);
+  if(sec) sec.classList.add('active');
+  const nav=document.getElementById('nav-'+id);
+  if(nav) nav.classList.add('active');
+  document.getElementById('main-scroll').scrollTop=0;
+  if(id==='dashboard') renderDashboard();
+  if(id==='terrains') renderTerrains();
+  if(id==='previsions') calcSim();
+}
+
+// ============ TERRAINS ============
+function openModalTerrain(id){
+  document.getElementById('t-edit-id').value = id||'';
+  if(id){
+    const t=getTerrain(id);
+    document.getElementById('t-nom').value=t.nom;
+    document.getElementById('t-superficie').value=t.superficie;
+    document.getElementById('t-plants').value=t.plants;
+    document.getElementById('t-lieu').value=t.lieu||'';
+    document.getElementById('t-mois').value=t.mois||8;
+    document.getElementById('t-variete').value=t.variete||'Cayenne Lisse';
+    document.getElementById('t-date').value=t.date||'';
+    document.getElementById('modal-terrain-title').textContent='Modifier le terrain';
+  } else {
+    document.getElementById('t-nom').value='';
+    document.getElementById('t-superficie').value='';
+    document.getElementById('t-plants').value='';
+    document.getElementById('t-lieu').value='';
+    document.getElementById('t-mois').value='8';
+    document.getElementById('t-date').valueAsDate=new Date();
+    document.getElementById('modal-terrain-title').textContent='Nouveau terrain';
+  }
+  openModal('modal-terrain');
+}
+
+function sauvegarderTerrain(){
+  const nom=document.getElementById('t-nom').value.trim();
+  const superficie=parseFloat(document.getElementById('t-superficie').value)||0;
+  const plants=parseInt(document.getElementById('t-plants').value)||0;
+  const lieu=document.getElementById('t-lieu').value.trim();
+  const mois=parseInt(document.getElementById('t-mois').value)||8;
+  const variete=document.getElementById('t-variete').value;
+  const date=document.getElementById('t-date').value;
+  const editId=document.getElementById('t-edit-id').value;
+  if(!nom){showToast('⚠️ Entrez un nom de terrain');return;}
+  if(!superficie){showToast('⚠️ Entrez la superficie');return;}
+  if(!plants){showToast('⚠️ Entrez le nombre de pieds');return;}
+  if(editId){
+    const t=getTerrain(editId);
+    t.nom=nom;t.superficie=superficie;t.plants=plants;t.lieu=lieu;t.mois=mois;t.variete=variete;t.date=date;
+  } else {
+    terrains.push({id:'t'+Date.now(),nom,superficie,plants,lieu,mois,variete,date});
+  }
+  save('terrains',terrains);
+  closeModal('modal-terrain');
+  renderTerrains();
+  renderDashboard();
+  syncToSheets();
+  showToast(editId?'✅ Terrain modifié !':'✅ Terrain ajouté !');
+}
+
+function supprimerTerrain(id){
+  if(!confirm('Supprimer ce terrain et toutes ses dépenses ?')) return;
+  terrains=terrains.filter(t=>t.id!==id);
+  delete depensesMap[id];
+  save('terrains',terrains);
+  save('depensesMap',depensesMap);
+  renderTerrains();
+  renderDashboard();
+  syncToSheets();
+  showToast('🗑️ Terrain supprimé');
+}
+
+function ouvrirDepenses(id){
+  currentTerrainId=id;
+  const t=getTerrain(id);
+  document.getElementById('dep-terrain-title').textContent='🍍 '+t.nom;
+  document.getElementById('dep-terrain-sub').textContent=t.superficie+' ha · '+t.plants.toLocaleString('fr-FR')+' pieds · '+t.lieu;
+  document.getElementById('dep-date').valueAsDate=new Date();
+  renderDepenses();
+  // hide nav-depenses active state handled by showing section without nav
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-depenses').classList.add('active');
+  document.getElementById('main-scroll').scrollTop=0;
+}
+
+function renderTerrains(){
+  const el=document.getElementById('terrains-list');
+  if(terrains.length===0){
+    el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><p>Aucun terrain enregistré.<br/>Appuyez sur le bouton ci-dessus pour commencer.</p></div>';
+    return;
+  }
+  el.innerHTML=terrains.map((t,i)=>{
+    const total=totalDep(t.id);
+    const pct=Math.round((t.mois/22)*100);
+    const col=COLORS[i%COLORS.length];
+    return `
+    <div class="terrain-card">
+      <div class="tc-header">
+        <div class="tc-icon" style="background:${col}22;">🌿</div>
+        <div style="flex:1;">
+          <div class="tc-title">${t.nom}</div>
+          <div class="tc-sub">${t.lieu||'—'} · ${t.variete}</div>
+        </div>
+        <span class="badge ${pct<50?'badge-amber':pct<90?'badge-blue':'badge-green'}">M${t.mois}</span>
+      </div>
+      <div class="tc-stats">
+        <div class="tc-stat"><div class="tc-stat-val mv-green">${t.superficie} ha</div><div class="tc-stat-lbl">superficie</div></div>
+        <div class="tc-stat"><div class="tc-stat-val">${fmt(t.plants)}</div><div class="tc-stat-lbl">pieds</div></div>
+        <div class="tc-stat"><div class="tc-stat-val mv-coral">${fmt(total)}</div><div class="tc-stat-lbl">FCFA dép.</div></div>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:3px;"><span>Cycle</span><span>${pct}%</span></div>
+        <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${col};"></div></div>
+      </div>
+      <div class="tc-actions">
+        <button class="btn-sm btn-sm-green" onclick="ouvrirDepenses('${t.id}')">💰 Dépenses</button>
+        <button class="btn-sm btn-sm-blue" onclick="openModalTerrain('${t.id}')">✏️ Modifier</button>
+        <button class="btn-sm btn-sm-coral" onclick="supprimerTerrain('${t.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============ DÉPENSES ============
+function ajouterDepense(){
+  if(!currentTerrainId){showToast('⚠️ Aucun terrain sélectionné');return;}
+  const nom=document.getElementById('dep-nom').value.trim();
+  const montant=parseInt(document.getElementById('dep-montant').value)||0;
+  const date=document.getElementById('dep-date').value||new Date().toISOString().slice(0,10);
+  const catEl=document.getElementById('dep-cat');
+  const catText=catEl.options[catEl.selectedIndex].text;
+  const catIcon=catEl.value;
+  if(!nom){showToast('⚠️ Entrez une désignation');return;}
+  if(!montant){showToast('⚠️ Entrez un montant');return;}
+  if(!depensesMap[currentTerrainId]) depensesMap[currentTerrainId]=[];
+  depensesMap[currentTerrainId].unshift({id:Date.now(),icon:catIcon,cat:catText,nom,montant,date});
+  save('depensesMap',depensesMap);
+  document.getElementById('dep-nom').value='';
+  document.getElementById('dep-montant').value='';
+  renderDepenses();
+  syncToSheets();
+  showToast('✅ Dépense enregistrée !');
+}
+
+function supprimerDepense(id){
+  if(!confirm('Supprimer cette dépense ?')) return;
+  depensesMap[currentTerrainId]=depensesMap[currentTerrainId].filter(d=>d.id!==id);
+  save('depensesMap',depensesMap);
+  renderDepenses();
+  syncToSheets();
+  showToast('🗑️ Dépense supprimée');
+}
+
+function renderDepenses(){
+  if(!currentTerrainId) return;
+  const deps=getDepenses(currentTerrainId);
+  const total=deps.reduce((s,d)=>s+d.montant,0);
+  document.getElementById('dep-total-metric').textContent=fmt(total);
+  document.getElementById('dep-count-metric').textContent=deps.length;
+  document.getElementById('dep-total-affiche').textContent=fmt(total)+' FCFA';
+  const el=document.getElementById('liste-depenses');
+  if(deps.length===0){
+    el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>Aucune dépense pour ce terrain.</p></div>';
+  } else {
+    el.innerHTML=deps.map(d=>`
+      <div class="expense-item">
+        <div class="exp-icon">${d.icon}</div>
+        <div class="exp-info">
+          <div class="exp-name">${d.nom}</div>
+          <div class="exp-cat">${d.cat} · ${d.date}</div>
+        </div>
+        <div class="exp-amount">${fmt(d.montant)}</div>
+        <button class="exp-del" onclick="supprimerDepense(${d.id})">✕</button>
+      </div>`).join('');
+  }
+}
+
+function exporterDepenses(){
+  if(!currentTerrainId) return;
+  const deps=getDepenses(currentTerrainId);
+  if(deps.length===0){showToast('Aucune dépense à exporter');return;}
+  const t=getTerrain(currentTerrainId);
+  let csv='Date,Catégorie,Désignation,Montant (FCFA)\n';
+  deps.forEach(d=>{csv+=`${d.date},"${d.cat}","${d.nom}",${d.montant}\n`;});
+  csv+=`\nTOTAL,,,${deps.reduce((s,d)=>s+d.montant,0)}\n`;
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='depenses_'+t.nom.replace(/\s/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  showToast('📤 CSV téléchargé !');
+}
+
+// ============ DASHBOARD ============
+function renderDashboard(){
+  const totalTerrains=terrains.length;
+  const totalSup=terrains.reduce((s,t)=>s+t.superficie,0);
+  const totalPlants=terrains.reduce((s,t)=>s+t.plants,0);
+  const totalDeps=terrains.reduce((s,t)=>s+totalDep(t.id),0);
+  document.getElementById('d-terrains').textContent=totalTerrains;
+  document.getElementById('d-superficie').textContent=totalSup.toFixed(1)+' ha';
+  document.getElementById('d-plants').textContent=fmt(totalPlants);
+  document.getElementById('d-depenses').textContent=fmt(totalDeps);
+
+  // recap list
+  const el=document.getElementById('dash-terrains-list');
+  if(terrains.length===0){
+    el.innerHTML='<div class="empty"><div class="empty-icon">🗺️</div><p>Aucun terrain enregistré.<br/>Allez dans "Terrains" pour en ajouter.</p></div>';
+  } else {
+    el.innerHTML=terrains.map((t,i)=>{
+      const dep=totalDep(t.id);
+      const col=COLORS[i%COLORS.length];
+      const pct=Math.round((dep/Math.max(totalDeps,1))*100);
+      return `<div class="sum-row">
+        <div class="sum-name"><span class="dot" style="background:${col};"></span>${t.nom}</div>
+        <div class="sum-vals">
+          <div class="sum-dep">${fmt(dep)} FCFA</div>
+          <div class="sum-plants">${fmt(t.plants)} pieds · ${t.superficie} ha</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // donut
+  if(dashDonutInst){dashDonutInst.destroy();dashDonutInst=null;}
+  const ctx=document.getElementById('dashDonut');
+  if(ctx && terrains.length>0){
+    dashDonutInst=new Chart(ctx,{
+      type:'doughnut',
+      data:{
+        labels:terrains.map(t=>t.nom),
+        datasets:[{
+          data:terrains.map(t=>totalDep(t.id)||1),
+          backgroundColor:terrains.map((_,i)=>COLORS[i%COLORS.length]),
+          borderWidth:0,hoverOffset:4
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},padding:10}}},cutout:'60%'}
+    });
+  }
+
+  updateGlobalPrev();
+}
+
+function updateGlobalPrev(){
+  const prix = parseInt(document.getElementById('g-prix-tonne').value) || 100000;
+  const tonneHa = parseFloat(document.getElementById('g-tonne-ha').value) || 20;
+  const totalSup = terrains.reduce((s,t) => s + t.superficie, 0);
+  const totalDeps = terrains.reduce((s,t) => s + totalDep(t.id), 0);
+  const prod = tonneHa * totalSup;
+  const ca = Math.round(prod * prix);
+  const benef = ca - totalDeps;
+  document.getElementById('g-prod').textContent = prod.toFixed(1);
+  document.getElementById('g-ca').textContent = fmt(ca);
+  document.getElementById('g-charges').textContent = fmt(totalDeps);
+  document.getElementById('g-benef').textContent = (benef >= 0 ? '+' : '') + fmt(benef);
+  document.getElementById('g-benef').className = 'metric-value ' + (benef >= 0 ? 'mv-green' : 'mv-coral');
+}
+
+// ============ SIMULATION PRÉVISIONS ============
+function calcSim(){
+  const tonne = parseInt(document.getElementById('sl-tonne').value)||20;
+  const ha    = parseFloat(document.getElementById('sl-ha').value)||2.5;
+  const prix  = parseInt(document.getElementById('sl-prix').value)||100000;
+  const depHa = parseInt(document.getElementById('sl-dep').value)||300000;
+
+  // labels curseurs
+  document.getElementById('sv-tonne').textContent = tonne+' t/ha';
+  document.getElementById('sv-ha').textContent    = ha+' ha';
+  document.getElementById('sv-prix').textContent  = fmt(prix)+' FCFA';
+  document.getElementById('sv-dep').textContent   = fmt(depHa)+' FCFA';
+
+  // calculs
+  const prod    = tonne * ha;               // tonnes totales
+  const ca      = prod * prix;              // chiffre d'affaires
+  const charges = depHa * ha;              // dépenses totales
+  const benef   = ca - charges;            // bénéfice net
+  const benefHa = Math.round(benef / ha);  // bénéfice/ha
+  const rendVal = charges > 0 ? Math.round(ca / prod) : 0; // FCFA/tonne réel
+  const roi     = charges > 0 ? Math.round((benef / charges) * 100) : 0;
+
+  // intermédiaires
+  document.getElementById('sim-prod').textContent    = prod.toFixed(1)+' tonnes';
+  document.getElementById('sim-ca').textContent      = fmt(ca)+' FCFA';
+  document.getElementById('sim-charges').textContent = fmt(charges)+' FCFA';
+
+  // KPI
+  document.getElementById('sim-benef').textContent    = (benef>=0?'+':'')+fmt(benef)+' FCFA';
+  document.getElementById('sim-benef').className      = 'metric-value '+(benef>=0?'mv-green':'mv-coral');
+  document.getElementById('sim-benef-ha').textContent = (benefHa>=0?'+':'')+fmt(benefHa);
+  document.getElementById('sim-benef-ha').className   = 'metric-value '+(benefHa>=0?'mv-amber':'mv-coral');
+  document.getElementById('sim-rendval').textContent  = fmt(rendVal)+' F';
+  document.getElementById('sim-roi').textContent      = roi+'%';
+  document.getElementById('sim-roi').className        = 'metric-value '+(roi>=0?'mv-green':'mv-coral');
+
+  // jauge rentabilité (plafonnée à 200% ROI pour la barre)
+  const pct = Math.min(Math.max(roi, 0), 200) / 2;
+  document.getElementById('sim-prog').style.width = pct+'%';
+  document.getElementById('sim-prog').style.background =
+    roi < 0 ? 'var(--coral)' : roi < 30 ? 'var(--amber)' : 'var(--green)';
+  document.getElementById('sim-rentlabel').textContent =
+    roi < 0 ? '⛔ Perte' : roi < 30 ? '⚠️ Faible ('+roi+'%)' : roi < 80 ? '✅ Correcte ('+roi+'%)' : '🚀 Excellente ('+roi+'%)';
+  document.getElementById('sim-rentlabel').style.color =
+    roi < 0 ? 'var(--coral)' : roi < 30 ? 'var(--amber)' : 'var(--green)';
+}
+
+function resetSim(){
+  document.getElementById('sl-tonne').value = 20;
+  document.getElementById('sl-ha').value    = 2.5;
+  document.getElementById('sl-prix').value  = 100000;
+  document.getElementById('sl-dep').value   = 300000;
+  calcSim();
+}
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('dep-date').valueAsDate = new Date();
+  document.getElementById('modal-terrain').addEventListener('click', function(e){
+    if(e.target===this) closeModal('modal-terrain');
+  });
+
+  // Affiche d'abord les données locales (rapide)
+  renderDashboard();
+  renderTerrains();
+  calcSim();
+
+  // Puis charge depuis Google Sheets et remplace
+  await chargerDepuisSheets();
+});
+
+async function chargerDepuisSheets(){
+  setSyncStatus('syncing', '🔄 Chargement des données…');
+  try {
+    const resp = await fetch(GS_URL + '?t=' + Date.now(), {
+      method: 'GET',
+      mode: 'cors'
+    });
+    const json = await resp.json();
+
+    if(json.status === 'ok' && Array.isArray(json.terrains)){
+      // Remplace les données locales par celles de Google Sheets
+      terrains    = json.terrains;
+      depensesMap = json.depensesMap || {};
+      save('terrains', terrains);
+      save('depensesMap', depensesMap);
+
+      renderDashboard();
+      renderTerrains();
+
+      const nb = terrains.length;
+      setSyncStatus('ok', '✅ ' + nb + ' terrain(s) chargé(s) depuis Google Sheets · ' +
+        new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
+    } else {
+      setSyncStatus('ok', '☁️ Google Sheets vide — prêt à saisir');
+    }
+  } catch(e){
+    // Pas de connexion : on reste sur les données locales
+    setSyncStatus('error', '⚠️ Hors ligne — données locales affichées');
+  }
+}
+</script>
+</body>
+</html>
