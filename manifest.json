@@ -1,0 +1,26 @@
+{
+  "name": "AnanasManager",
+  "short_name": "AnanasManager",
+  "description": "Gestion de plantation d'ananas — terrains, dépenses, rendement, prévisions",
+  "start_url": "/ananasmanager/",
+  "scope": "/ananasmanager/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7faf5",
+  "theme_color": "#2d6a1f",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/Fredsed/ananasmanager/main/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/Fredsed/ananasmanager/main/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
